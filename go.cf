@@ -1,0 +1,102 @@
+comment "//";
+comment "/*" "*/";
+
+entrypoints Start;
+
+rules     Boolean ::= "true" | "false" ;
+
+ExpAnd.        RExp ::= RExp "&&" RExp ;
+ExpOr.         RExp ::= RExp "||" RExp ;
+ExpNot.        RExp ::= "!" RExp ;        
+ExpEq.         RExp ::= RExp "==" RExp ;
+ExpNeq.        RExp ::= RExp "!=" RExp ;
+ExpLt.         RExp ::= RExp "<" RExp ;
+ExpLtE.        RExp ::= RExp "<=" RExp ;
+ExpGt.         RExp ::= RExp ">" RExp ;
+ExpGtE.        RExp ::= RExp ">=" RExp ;
+ExpAdd.        RExp ::= RExp "+" RExp ;
+ExpSub.        RExp ::= RExp "-" RExp ;
+ExpMul.        RExp ::= RExp "*" RExp ;
+ExpDiv.        RExp ::= RExp "/" RExp ;
+ExpMod.        RExp ::= RExp "%" RExp ;
+ExpNeg.        RExp ::= "-" RExp ;
+ExpRef.        RExp ::= "&" LExp ;
+ExpFuncEmpty.  RExp ::= Id "(" ")" ;
+ExpFunc.       RExp ::= Id "(" [RExp] ")" ;
+ExpVal.        RExp ::= Val ;
+ExpLExp.       RExp ::= LExp ;
+ExpPar.        RExp ::= "(" RExp ")";
+StRead.        RExp ::= ReadT "(" ")";
+
+Int .         Val ::= Integer ;
+Float .       Val ::= Double ;
+Char .        Val  ::= Char ;
+String .      Val ::= String ;
+Bool .        Val  ::= Boolean ;
+
+rules     ReadT  ::= "readInt" | "readFloat" | "readChar" | "readString" ;
+
+ExpId.    LExp ::= Id ;
+ExpArr.   LExp ::= LExp "[" RExp "]" ;
+ExpDeref. LExp ::= "*" RExp ;
+
+separator nonempty RExp "," ;
+
+Entry.          Start ::= "package" Id [Decl];
+
+separator Decl "";
+
+DeclVar.         Decl ::= "var"  [Id] Type;
+DeclVarInit.     Decl ::= "var"  [Id] "=" [RExp];
+DeclVarTypeInit. Decl ::= "var"  [Id] Type "=" [RExp];
+DeclVarShort.    ShortVarDecl ::= [Id] ":=" [RExp];
+
+TVoid.    Type ::= "void";
+TInt.     Type ::= "int";
+TBool.    Type ::= "bool";
+TFloat.   Type ::= "float";
+TChar.    Type ::= "char";
+TString.  Type ::= "string";
+TArray.   Type ::=  "[" Integer "]" Type; 
+TPointer. Type ::= "*" Type; 
+
+token Id (letter | '_')(letter | digit | '_')*;
+separator nonempty Id "," ;
+
+DeclFun.         Decl ::= "func" Id "(" [Param] ")" Type Block;
+DeclProc.        Decl ::= "func" Id "(" [Param] ")" "void" Block;
+
+separator Param ",";
+
+Parameter.         Param ::=  [Id] Type;
+ParameterPass.     Param ::=  Pass [Id] Type;
+
+PassVal.        Pass  ::=  "val";
+PassRef.        Pass  ::=  "ref";
+
+separator Stmt "";
+
+BodyBlock. Block ::= "{" [Stmt] "}";
+
+StDecl.           Stmt ::= Decl;
+StBlock.          Stmt ::= Block;
+StSmpl.           Stmt ::= StmtSmpl;
+StIf.             Stmt ::= "if" RExp Block;
+StIfElse.         Stmt ::= "if" RExp Block "else" Block;
+StWhile.          Stmt ::= "for" RExp Block;
+StDoWhile.        Stmt ::= "do" Block "for" RExp;
+StFor.            Stmt ::= "for" [StmtSmpl] ";" RExp ";" [StmtSmpl] Block;
+StBreak.          Stmt ::= "break";
+StContinue.       Stmt ::= "continue";
+StReturn.         Stmt ::= "return" RExp;
+StTryCatch.       Stmt ::= "try" Stmt "catch" Stmt;
+StWrite.          Stmt ::= WriteT "(" RExp ")";
+
+rules     WriteT ::= "writeInt" | "writeFloat" | "writeChar" | "writeString" ;
+
+StShortVarDecl.   StmtSmpl ::= ShortVarDecl;
+StExp.            StmtSmpl ::= RExp;
+StAsgn.           StmtSmpl ::= LExp "=" RExp;
+
+[].     [StmtSmpl] ::= ;
+(:[]).  [StmtSmpl] ::= StmtSmpl;
